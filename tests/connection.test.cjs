@@ -8,6 +8,15 @@ const now = 1794000000000;
 const window = {location: {hostname: 'example.github.io'}};
 vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname, '../assets/connection.js'), 'utf8'), {window, crypto: webcrypto, TextDecoder, Uint8Array, URL, URLSearchParams, atob});
 const verify = window.IRISConnection.verifyConnection;
+test('short opaque links always connect to the pinned API only', async () => {
+  const ticket = 'a'.repeat(22);
+  const result = await verify('#' + ticket);
+  assert.equal(result.api, 'https://sorabot-api.neim-soraworld.com');
+  assert.equal(result.ticket, ticket);
+  for (const suffix of ['&api=https://evil.example', '?api=x', '/evil', '=x']) {
+    await assert.rejects(verify('#' + ticket + suffix));
+  }
+});
 let keys;
 let jwk;
 const ready = (async () => {
