@@ -6,6 +6,12 @@
     return Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
   };
   async function verifyConnection(fragment, jwk, now = Date.now) {
+    // The short link carries no host: TLS and this pinned origin select the API.
+    // Ticket expiry, single use, password and room-admin approval are server-side.
+    const shortTicket = fragment.replace(/^#/, '');
+    if (/^[A-Za-z0-9_-]{22}$/.test(shortTicket)) {
+      return {api: 'https://sorabot-api.neim-soraworld.com', ticket: shortTicket};
+    }
     const params = new URLSearchParams(fragment.replace(/^#/, ''));
     if ([...params.keys()].length !== 2 || !params.has('connect') || !params.has('sig')) throw new Error('invalid-link');
     const payload = decode(params.get('connect'));
