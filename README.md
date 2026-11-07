@@ -1,6 +1,6 @@
 # SoraBot Manager
 
-카카오톡 봇 방 관리자를 위한 정적 기능 설정 화면입니다. 저장소는 `notificationbot/sorabot-manager`이며 비공개입니다. 정적 화면은 Cloudflare Pages의 `https://sorabot-manager.pages.dev/`에 직접 업로드하여 배포합니다. 기존 도움말과 회사 도메인은 사용하거나 수정하지 않습니다.
+카카오톡 봇 방 관리자를 위한 정적 기능 설정 화면입니다. 저장소는 `notificationbot/sorabot-manager`이며 사용자 요청으로 공개 전환했습니다. 정적 화면은 Cloudflare Pages의 `https://sorabot-manager.pages.dev/`에 직접 업로드하여 배포합니다. 기존 도움말과 회사 도메인은 사용하거나 수정하지 않습니다.
 
 ## 사용
 

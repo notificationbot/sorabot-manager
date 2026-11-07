@@ -16,7 +16,7 @@ web
 
 ## Operating Context
 
-기존 PC 매니저와 같은 방별 기능 설정을 사용한다. 웹 화면은 기존 도움말 저장소를 변경하지 않고 별도 비공개 `sorabot-manager` 저장소에서 관리한다. Cloudflare Pages 직접 업로드로 sorabot-manager.pages.dev에 배포하며 기존 도메인과 DNS 설정은 변경하지 않는다. 실제 설정 변경 API는 봇 PC에서 실행한다.
+기존 PC 매니저와 같은 방별 기능 설정을 사용한다. 웹 화면은 기존 도움말 저장소를 변경하지 않고 별도 공개 `sorabot-manager` 저장소에서 관리한다. Cloudflare Pages 직접 업로드로 sorabot-manager.pages.dev에 배포하며 기존 도메인과 DNS 설정은 변경하지 않는다. 실제 설정 변경 API는 봇 PC에서 실행한다.
 
 ## Capabilities and Constraints
 
