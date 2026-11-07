@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://*.trycloudflare.com http://127.0.0.1:8781; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="color-scheme" content="light">
+  <title>IRIS Manager · 방 기능 관리</title>
+  <link rel="icon" href="assets/iris.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/daisyui.css">
+  <link rel="stylesheet" href="assets/app.css">
+  <script src="assets/app.js"></script>
+  <script src="assets/connection.js"></script>
+</head>
+<body>
+  <a href="#main" class="skip-link">본문으로 건너뛰기</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="IRIS Manager 처음으로"><img src="assets/iris.svg" width="32" height="32" alt=""><span>IRIS <span class="brand-light">Manager</span></span></a>
+    <span class="header-label">카카오톡 봇 · 방 관리자</span>
+    <button id="logout" class="btn btn-ghost" type="button" hidden>연결 종료 <span aria-hidden="true">↗</span></button>
+  </header>
+  <main id="main">
+    <section id="auth" class="auth-layout" aria-labelledby="auth-title">
+      <div class="auth-intro">
+        <h1>우리 방에 필요한<br>기능만, 알맞게.</h1>
+        <p>IRIS가 함께하는 방의 기능을<br>한곳에서 간편하게 관리하세요.</p>
+        <div class="intro-rule"></div>
+        <p class="intro-note">방 관리자를 위한 전용 공간입니다.<br>연결된 방의 기능만 변경할 수 있습니다.</p>
+      </div>
+      <div class="auth-panel">
+        <div class="lock-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></div>
+        <h2 id="auth-title">관리자 접속</h2>
+        <p id="auth-description">카카오톡에서 /기능을 입력해 접속해 주세요.</p>
+        <form id="login-form" hidden>
+          <label class="field-label" for="password">관리자 비밀번호</label>
+          <div class="password-field"><input id="password" class="input" type="password" autocomplete="current-password" required maxlength="512" aria-describedby="auth-error"><button id="show-password" type="button" class="btn btn-ghost" aria-controls="password" aria-pressed="false">표시</button></div>
+          <p id="auth-error" class="field-error" role="alert"></p>
+          <button id="login-button" class="btn btn-primary btn-block" type="submit">방 관리 시작하기 <span aria-hidden="true">→</span></button>
+        </form>
+        <section id="approval" class="approval-step" hidden aria-labelledby="approval-title">
+          <h3 id="approval-title" tabindex="-1">카카오톡에서 접속을 승인해 주세요</h3>
+          <p>링크를 받은 같은 방에서, 링크를 발급받은 관리자 계정으로 아래 명령어를 입력하세요.</p>
+          <label class="field-label" for="approval-command">승인 명령어</label>
+          <input id="approval-command" class="input" readonly aria-describedby="approval-status">
+          <button id="copy-approval" class="btn btn-outline" type="button">명령어 복사</button>
+          <p id="approval-status" role="status" aria-live="polite">승인을 기다리고 있습니다. 3분 안에 입력해 주세요.</p>
+        </section>
+        <div class="auth-footnote"><span class="small-dot" aria-hidden="true"></span>접속 정보는 이 브라우저에 저장되지 않습니다.</div>
+      </div>
+    </section>
+    <section id="manager" class="manager" hidden aria-labelledby="page-title">
+      <aside class="sidebar">
+        <nav aria-label="기능 분류"><h3 class="nav-title">기능 분류</h3><div id="categories" class="category-list"></div></nav>
+        <div class="sidebar-note"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8 12 3 3 5-6"/></svg><p>관리자 권한으로 연결됨<br><span>권한은 변경할 때마다 확인합니다.</span></p></div>
+      </aside>
+      <div class="workspace">
+        <div class="room-hero"><h1 id="room-name"></h1><p>이 방에 필요한 기능을, 알맞게.</p><span class="scope-note">연결된 방에만 적용됩니다</span></div>
+        <div class="page-heading"><div><h2 id="page-title">방 기능 관리</h2><p>기능은 바로 저장됩니다. 게임 한도는 입력 후 저장해 주세요.</p></div><button id="refresh" class="btn btn-outline" type="button"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 11-1l3 6M4 12l3 6a7 7 0 0 0 11-1"/></svg>새로고침</button></div>
+        <div id="notice" class="notice" role="status" aria-live="polite"><span id="notice-text">저장된 설정을 불러왔습니다.</span></div>
+        <div class="filter-bar"><label class="input search-field"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="search" type="search" placeholder="기능 이름이나 설명 검색" aria-label="기능 검색" autocomplete="off"></label><label class="state-filter" for="state-filter">표시<select id="state-filter"><option value="all">모든 상태</option><option value="on">켜진 기능</option><option value="off">꺼진 기능</option></select></label></div>
+        <div class="list-heading"><h2 id="list-title">전체 기능</h2><p><span id="enabled-count">0</span>개 켜짐 <span class="count-divider">/</span> 전체 <span id="total-count">0</span>개</p></div>
+        <div id="features" class="feature-list" aria-busy="false"></div>
+        <div id="empty" class="empty-state" hidden><h3>일치하는 기능이 없습니다</h3><p>다른 검색어나 표시 상태를 선택해 보세요.</p><button id="clear-filters" class="btn btn-outline" type="button">필터 초기화</button></div>
+        <p class="workspace-note">변경 사항은 연결된 방에만 적용됩니다. 다른 관리자의 변경은 새로고침으로 확인하세요.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="footer-line"><span>IRIS · Room controls</span><span>필요한 기능에 집중하세요.</span></footer>
+  <noscript><p class="noscript">이 페이지는 JavaScript가 필요합니다. 브라우저 설정에서 JavaScript를 허용해 주세요.</p></noscript>
+</body>
+</html>
