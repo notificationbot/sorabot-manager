@@ -21,7 +21,9 @@
 
 ## 연결 규약
 
-봇이 발급하는 fragment는 `#connect=<base64url JSON>&sig=<base64url signature>`입니다. 프론트엔드는 이를 즉시 주소에서 제거합니다. 같은 출처의 `assets/trust-key.json` 공개 JWK로 원본 payload 바이트의 ECDSA P-256/SHA-256 서명을 확인한 뒤에만 비밀번호 폼과 API 접속을 허용합니다. payload 키는 정확히 `{api,ticket,expires}`이며 만료는 현재부터 330초 이내입니다. 64바이트 raw 서명을 사용합니다. 기존 `api/ticket` 직접 전달 링크는 거부합니다.
+고정 API 전환 후 기본 fragment는 `#<22자리 일회용 코드>`입니다. API 주소는 코드에 들어있지 않으며 `https://sorabot-api.neim-soraworld.com`으로 고정됩니다. 프론트엔드는 코드를 즉시 주소에서 제거합니다. 서버는 5분 만료·일회용 처리·비밀번호·원 발급자의 같은 방 승인을 검사합니다. 토글은 클릭할 때마다 PATCH를 보내고, 저장 성공 후 화면을 갱신합니다. 봇은 같은 설정을 읽어 다음 명령부터 즉시 적용합니다.
+
+전환 중 이전 링크 호환을 위해 `#connect=<base64url JSON>&sig=<base64url signature>`도 지원합니다. 이 형식은 같은 출처의 `assets/trust-key.json` 공개 JWK로 원본 payload 바이트의 ECDSA P-256/SHA-256 서명을 확인합니다. payload 키는 정확히 `{api,ticket,expires}`이며 만료는 현재부터 330초 이내입니다. 64바이트 raw 서명을 사용합니다. 임의 `api/ticket` 직접 전달 링크는 거부합니다.
 
 허용 API는 HTTPS 단일 `*.trycloudflare.com` 호스트입니다. 페이지 자체가 `localhost` 또는 `127.0.0.1`일 때만 `http://127.0.0.1:8781`도 허용합니다. 자격 증명, 별도 경로, 쿼리 문자열이나 fragment가 포함된 API 주소는 거부합니다. 실행 중 외부 스크립트, 폰트, 이미지, 분석 도구는 요청하지 않습니다.
 
