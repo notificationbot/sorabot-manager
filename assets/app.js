@@ -5,6 +5,9 @@
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
   let ticket = '';
   let api = '';
+  const roomParams = new URLSearchParams(window.location.search);
+  const roomCode = roomParams.get('room') || '';
+  const validRoomPath = [...roomParams.keys()].length === 1 && /^[a-f0-9]{24}$/.test(roomCode);
 
   document.addEventListener('DOMContentLoaded', () => {
     const $ = (id) => document.getElementById(id);
@@ -284,6 +287,21 @@
         if (epoch === requestEpoch) { lock(false); featureButtons.get(feature.key)?.focus({preventScroll: true}); }
       }
     }
+    function enterRoom(data) {
+      if (!data || typeof data.token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(data.token) || !Number.isFinite(data.expires_in) || data.expires_in <= 0 || data.expires_in > 1800) throw new Error('invalid-session');
+      applyState(data);
+      token = data.token;
+      ticket = '';
+      expiresAt = Date.now() + data.expires_in * 1000;
+      expiryTimer = setTimeout(expire, data.expires_in * 1000);
+      $('auth').hidden = true;
+      $('manager').hidden = false;
+      $('logout').hidden = false;
+      requestAnimationFrame(fitRoomName);
+      showNotice('이 방의 설정을 불러왔습니다. 토글을 누르면 바로 반영됩니다.');
+      $('page-title').setAttribute('tabindex', '-1');
+      $('page-title').focus();
+    }
     $('login-form').addEventListener('submit', async (event) => {
       event.preventDefault();
       if (busy || !ticket || !api) return;
@@ -298,8 +316,9 @@
       let password = $('password').value;
       $('password').value = '';
       try {
-        const data = await request('/api/login', 'POST', {ticket, password}, '');
+        const data = await request('/api/login', 'POST', {ticket, password, room: roomCode}, '');
         if (epoch !== requestEpoch) return;
+        if (!data.pending) { enterRoom(data); return; }
         if (!data.pending || data.approval_required !== true || typeof data.request_token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(data.request_token) || !/^\d{8}$/.test(data.approval_code) || !Number.isFinite(data.expires_in) || data.expires_in <= 0 || data.expires_in > 180) throw new Error('invalid-approval');
         approvalToken = data.request_token;
         approvalExpires = Date.now() + data.expires_in * 1000;
@@ -381,6 +400,7 @@
     (async () => {
       const epoch = requestEpoch;
       if (!fragment) return;
+      if (!validRoomPath) { showAuth('방 전용 주소가 필요합니다. 해당 채팅방에서 /기능을 입력해 새 링크로 접속해 주세요.'); fragment = ''; return; }
       $('auth-description').textContent = '접속 링크의 서명을 확인하고 있습니다…';
       try {
         const keyURL = new URL('assets/trust-key.json', window.location.href);
@@ -391,7 +411,7 @@
         if (epoch !== requestEpoch) return;
         api = connection.api; ticket = connection.ticket;
         $('login-form').hidden = false;
-        $('auth-description').textContent = '비밀번호를 입력한 뒤 카카오톡에서 접속을 승인하면 방을 관리할 수 있습니다.';
+        $('auth-description').textContent = '관리자 비밀번호를 입력하면 이 방의 설정이 바로 열립니다.';
       } catch {
         if (epoch === requestEpoch) showAuth('접속 링크의 서명을 확인할 수 없습니다. 카카오톡에서 /기능을 입력해 새 링크로 접속해 주세요.');
       } finally { fragment = ''; }
