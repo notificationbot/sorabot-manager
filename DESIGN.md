@@ -1,4 +1,4 @@
-# IRIS Manager design
+# SoraBot Manager design
 
 ## Surface
 

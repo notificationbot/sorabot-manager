@@ -1,6 +1,6 @@
-# IRIS Manager
+# SoraBot Manager
 
-카카오톡 봇 방 관리자를 위한 정적 기능 설정 화면입니다. 대상 배포 경로는 `https://notificationbot.github.io/iris-manager/`이며, 기존 도움말 저장소와 배포는 별도로 유지합니다.
+카카오톡 봇 방 관리자를 위한 정적 기능 설정 화면입니다. 저장소는 `notificationbot/sorabot-manager`이며 비공개입니다. 현재 계정에서는 비공개 저장소의 GitHub Pages를 사용할 수 없어 외부 배포는 대기 중입니다. Pages 사용 시 예정 경로는 `https://notificationbot.github.io/sorabot-manager/`입니다. 기존 도움말 저장소와 배포는 별도로 유지합니다.
 
 ## 사용
 

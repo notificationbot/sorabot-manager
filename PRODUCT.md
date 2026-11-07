@@ -1,4 +1,4 @@
-# IRIS Manager
+# SoraBot Manager
 
 <!-- impeccable:product-schema 1 -->
 
@@ -16,7 +16,7 @@ web
 
 ## Operating Context
 
-기존 PC 매니저와 같은 방별 기능 설정을 사용한다. 웹 화면은 기존 도움말 저장소를 변경하지 않고 별도 `iris-manager` 저장소와 GitHub Pages 경로에 배포한다. 실제 설정 변경 API는 봇 PC에서 실행한다.
+기존 PC 매니저와 같은 방별 기능 설정을 사용한다. 웹 화면은 기존 도움말 저장소를 변경하지 않고 별도 비공개 `sorabot-manager` 저장소에서 관리한다. 현재 계정은 비공개 GitHub Pages를 지원하지 않아 배포 방식 결정 전이다. 실제 설정 변경 API는 봇 PC에서 실행한다.
 
 ## Capabilities and Constraints
 
