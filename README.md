@@ -4,7 +4,7 @@
 
 ## 사용
 
-관리자가 카카오톡 방에서 `/기능`을 입력하고 발급된 링크를 엽니다. 서명 확인 후 비밀번호를 입력하고, 같은 관리자 계정으로 같은 방에서 화면의 `/기능 인증 CODE` 명령어를 입력하면 접속됩니다. 기능 스위치는 서버의 저장 성공 응답을 받은 후 갱신됩니다. 그룹 카드와 게임별 최대 배팅 한도를 제공하며, 한도는 별도 저장합니다.
+관리자가 카카오톡 방에서 `/기능`을 입력하고 발급된 방 전용 링크를 엽니다. 주소는 `?room=<방전용코드>#<일회용티켓>` 형식이며 방 코드는 방마다 다르고 재시작 후에도 유지됩니다. 비밀번호를 입력하면 해당 방 설정으로 바로 접속하며 채팅방 인증 명령은 필요하지 않습니다. 서버가 방 코드와 티켓의 일치를 검사하고 세션을 해당 방에만 고정합니다. 기능 스위치는 클릭마다 즉시 저장하고 서버의 성공 응답 후 갱신됩니다. 그룹 카드와 게임별 최대 배팅 한도를 제공합니다.
 
 기능 검색, 분류, 켜짐/꺼짐 필터를 제공합니다. 충돌이 발생하면 최신 설정을 불러오고 다시 변경하도록 안내합니다. 연결이 끊어져 저장 결과를 확인하지 못하면 새로고침으로 확인할 때까지 변경을 잠급니다. 만료되거나 권한을 확인하지 못하면 `/기능`을 통한 재접속을 안내합니다.
 
@@ -21,13 +21,13 @@
 
 ## 연결 규약
 
-고정 API 전환 후 기본 fragment는 `#<22자리 일회용 코드>`입니다. API 주소는 코드에 들어있지 않으며 `https://sorabot-api.neim-soraworld.com`으로 고정됩니다. 프론트엔드는 코드를 즉시 주소에서 제거합니다. 서버는 5분 만료·일회용 처리·비밀번호·원 발급자의 같은 방 승인을 검사합니다. 토글은 클릭할 때마다 PATCH를 보내고, 저장 성공 후 화면을 갱신합니다. 봇은 같은 설정을 읽어 다음 명령부터 즉시 적용합니다.
+기본 주소는 `?room=<24자리 방전용코드>#<22자리 일회용 코드>`입니다. API는 `https://sorabot-api.neim-soraworld.com`으로 고정됩니다. 프론트엔드는 일회용 코드를 즉시 주소에서 제거하고 방 코드는 유지합니다. 서버는 방 코드와 티켓의 일치, 5분 만료·일회용 처리·비밀번호·발급자의 관리자 권한을 검사합니다. 토글은 클릭할 때마다 PATCH를 보내고, 저장 성공 후 화면을 갱신합니다. 봇은 같은 설정을 읽어 다음 명령부터 즉시 적용합니다.
 
 전환 중 이전 링크 호환을 위해 `#connect=<base64url JSON>&sig=<base64url signature>`도 지원합니다. 이 형식은 같은 출처의 `assets/trust-key.json` 공개 JWK로 원본 payload 바이트의 ECDSA P-256/SHA-256 서명을 확인합니다. payload 키는 정확히 `{api,ticket,expires}`이며 만료는 현재부터 330초 이내입니다. 64바이트 raw 서명을 사용합니다. 임의 `api/ticket` 직접 전달 링크는 거부합니다.
 
 허용 API는 HTTPS 단일 `*.trycloudflare.com` 호스트입니다. 페이지 자체가 `localhost` 또는 `127.0.0.1`일 때만 `http://127.0.0.1:8781`도 허용합니다. 자격 증명, 별도 경로, 쿼리 문자열이나 fragment가 포함된 API 주소는 거부합니다. 실행 중 외부 스크립트, 폰트, 이미지, 분석 도구는 요청하지 않습니다.
 
-- `POST /api/login`: JSON `{ticket, password}` → HTTP 202 `{approval_required:true, request_token, approval_code, expires_in:180}`
+- `POST /api/login`: JSON `{ticket, password, room}` → HTTP 200 `{token, expires_in, room, features, limits, revision}`. 운영 런타임은 채팅방 추가 승인 없이 방에 고정된 세션을 발급합니다.
 - `POST /api/approval`: JSON `{request_token}` → HTTP 202 대기 또는 HTTP 200 `{token, expires_in, room, features, limits, revision}`. 2초마다 확인하며 만료/페이지 종료 시 중단합니다.
 - `GET /api/features`: Bearer token → `{room, features, limits, revision}`
 - `PATCH /api/features`: Bearer token + JSON `{key, enabled, revision}` → 현재 상태

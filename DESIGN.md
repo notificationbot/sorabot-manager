@@ -16,7 +16,7 @@ Desktop: global header, restrained category sidebar, room identity hero and a se
 
 Standard labelled switches report saved state. Switching waits for API confirmation. All changes are serialized; uncertain results require refresh. Concurrent edits reload current state and ask the administrator to try the intended change again. Errors offer recovery in Korean. Focus rings, native form semantics, keyboard operation, 44-pixel interaction areas and reduced-motion support are required.
 
-Signed connection verification precedes the password form. Password acceptance opens a dedicated approval step: copy `/기능 인증 CODE`, enter it in the same chat with the same administrator, and wait for approval before accessing controls. Secrets remain in memory. A restrained glass arrival animation runs only when the manager opens, and respects reduced motion.
+Each room has its own stable opaque `?room=` address. The one-use fragment is removed immediately. The server checks that the room address matches the ticket and opens that room's controls directly after the password succeeds; there is no chat approval step in the production flow. Every session remains bound to its original room. Secrets remain in memory. A restrained glass arrival animation runs only when the manager opens, and respects reduced motion.
 
 ## Tokens
 
