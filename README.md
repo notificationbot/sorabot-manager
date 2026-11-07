@@ -1,6 +1,6 @@
 # SoraBot Manager
 
-카카오톡 봇 방 관리자를 위한 정적 기능 설정 화면입니다. 저장소는 `notificationbot/sorabot-manager`이며 비공개입니다. 현재 계정에서는 비공개 저장소의 GitHub Pages를 사용할 수 없어 외부 배포는 대기 중입니다. Pages 사용 시 예정 경로는 `https://notificationbot.github.io/sorabot-manager/`입니다. 기존 도움말 저장소와 배포는 별도로 유지합니다.
+카카오톡 봇 방 관리자를 위한 정적 기능 설정 화면입니다. 저장소는 `notificationbot/sorabot-manager`이며 비공개입니다. 정적 화면은 Cloudflare Pages의 `https://sorabot-manager.pages.dev/`에 직접 업로드하여 배포합니다. 기존 도움말과 회사 도메인은 사용하거나 수정하지 않습니다.
 
 ## 사용
 
@@ -10,7 +10,7 @@
 
 ## 정적 배포
 
-빌드 과정이나 Node.js 실행 환경이 필요하지 않습니다. GitHub Pages에서 저장소 기본 브랜치의 루트 디렉터리를 배포합니다. 공개 파일은 다음과 같습니다.
+빌드 과정이나 Node.js 실행 환경이 필요하지 않습니다. Cloudflare Pages에 index.html과 assets/를 루트 구조 그대로 직접 업로드합니다. GitHub 자동 배포는 연결하지 않습니다. 웹 파일은 다음과 같습니다.
 
 - `index.html`, `.nojekyll`, `.gitignore`
 - `assets/app.js`, `assets/connection.js`, `assets/trust-key.json` (공개 키만), `assets/app.css`, `assets/iris.svg`
