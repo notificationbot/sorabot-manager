@@ -32,6 +32,7 @@ body{background:radial-gradient(ellipse at 8% 8%,#e2eadb 0,transparent 42%),radi
 .lock-symbol{background:transparent;border-radius:0;justify-content:start;width:30px;height:30px;margin-bottom:20px}
 .auth-footnote,.sidebar-note,.sidebar-note span,.scope-note,.workspace-note,.footer-line{font-size:12px}.switch-label{font-size:12px}.limit-hint{font-size:12px!important}
 .feature-group .feature-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px}.feature-group .feature-copy{min-width:0}.feature-group .switch-wrap{min-width:68px;flex-wrap:nowrap}.limit-row{padding:17px 0;border-bottom:1px solid #dce2d6}.limit-row:last-child{border:0;padding-bottom:2px}.limit-row .limit-form{padding:0;margin:0}
+.odds-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.odds-field{min-width:0}.odds-field .field-label{display:block;margin-bottom:8px;font-size:13px}.odds-field .input{width:100%;min-width:0;min-height:44px;font-variant-numeric:tabular-nums}.odds-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.odds-actions .btn{min-height:44px}.odds-form{min-width:0}
 @media(max-width:360px){.feature-group .feature-row{grid-template-columns:minmax(0,1fr) 48px;gap:12px}.feature-group .switch-wrap{min-width:48px}}
 
 /* User-selected pastel palette; translucent groups keep dark, readable ink. */

@@ -76,7 +76,8 @@
         if (!limit || !['odd_even', 'slot', 'fishing', 'updown', 'minesweeper'].includes(limit.key) || limitKeys.has(limit.key) || typeof limit.label !== 'string' || !Number.isSafeInteger(limit.min_bet) || limit.min_bet < 0 || !Number.isSafeInteger(limit.hard_max) || limit.hard_max < limit.min_bet || (!legacy && (!Number.isSafeInteger(limit.max_bet) || limit.max_bet < 0 || (limit.max_bet !== 0 && (limit.max_bet < limit.min_bet || limit.max_bet > limit.hard_max))))) throw new Error('invalid-limits');
         limitKeys.add(limit.key);
       }
-      return {room: {id: data.room.id, name: data.room.name}, limits: data.limits.map((limit) => ({...limit})), features: data.features.map(({key, label, enabled, category: group, description}) => ({key, label, enabled, category: group || '기타', description})), revision: data.revision};
+      if (data.slot_odds !== undefined && (!Array.isArray(data.slot_odds) || data.slot_odds.length !== 6 || data.slot_odds.some((value) => !Number.isInteger(value) || value < 0 || value > 100) || data.slot_odds.reduce((a, b) => a + b, 0) !== 100)) throw new Error('invalid-odds');
+      return {room: {id: data.room.id, name: data.room.name}, slot_odds: data.slot_odds ? [...data.slot_odds] : null, limits: data.limits.map((limit) => ({...limit})), features: data.features.map(({key, label, enabled, category: group, description}) => ({key, label, enabled, category: group || '기타', description})), revision: data.revision};
     }
     async function request(path, method = 'GET', body, bearer = token) {
       if (!api) throw new Error('unverified-connection');
@@ -185,10 +186,70 @@
         if (name === gameCategory && groups.has('__limits')) ordered.push(groups.get('__limits').group);
       }
       if (groups.has('__limits') && !groups.has(gameCategory)) ordered.unshift(groups.get('__limits').group);
+      if (state.slot_odds && (!category || category === gameCategory) && filter === 'all' && (!query || '슬롯 확률 출현 그림'.includes(query))) {
+        const group = node('section', 'card feature-group group-limits');
+        const body = node('div', 'card-body');
+        body.append(node('h3', 'card-title group-title', '슬롯 출현 확률'), makeOddsForm());
+        group.append(body);
+        ordered.push(group);
+      }
       $('features').replaceChildren(...ordered);
-      $('empty').hidden = groups.size !== 0;
+      $('empty').hidden = ordered.length !== 0;
       if (!state.features.length) { $('empty').querySelector('h3').textContent = '관리할 수 있는 기능이 없습니다'; $('empty').querySelector('p').textContent = '방에 제공되는 기능이 있는지 봇 운영자에게 확인해 주세요.'; }
       if (focusKey) featureButtons.get(focusKey)?.focus({preventScroll: true});
+    }
+    function makeOddsForm() {
+      const form = node('form', 'odds-form');
+      const hint = node('p', 'limit-hint', '각 칸의 그림 출현율입니다. 0~100% 정수로 입력하고 합계를 100%로 맞춰 주세요. 배당은 유지됩니다.');
+      hint.id = 'slot-odds-hint';
+      const fields = node('div', 'odds-fields');
+      const inputs = ['🍒 체리', '🍋 레몬', '🔔 벨', '⭐ 별', '💎 보석', '7️⃣ 세븐'].map((symbol, index) => {
+        const field = node('div', 'odds-field');
+        const label = node('label', 'field-label', `${symbol} (%)`);
+        const input = node('input', 'input limit-control');
+        input.id = `slot-odds-${index}`; label.htmlFor = input.id;
+        input.type = 'number'; input.inputMode = 'numeric'; input.min = '0'; input.max = '100'; input.step = '1'; input.required = true;
+        input.value = String(state.slot_odds[index]); input.disabled = busy || uncertain;
+        input.setAttribute('aria-describedby', hint.id);
+        field.append(label, input); fields.append(field);
+        return input;
+      });
+      const total = node('p', 'limit-hint'); total.setAttribute('aria-live', 'polite');
+      const updateTotal = () => {
+        inputs.forEach((input) => input.setCustomValidity(''));
+        const sum = inputs.reduce((value, input) => value + Number(input.value), 0);
+        total.textContent = `합계 ${sum}%${sum === 100 ? '' : ' · 100%로 맞춰 주세요.'}`;
+        return sum;
+      };
+      inputs.forEach((input) => input.addEventListener('input', updateTotal));
+      const actions = node('div', 'odds-actions');
+      const save = node('button', 'btn btn-outline limit-control', '확률 저장'); save.type = 'submit'; save.disabled = busy || uncertain;
+      const reset = node('button', 'btn btn-ghost limit-control', '기본값 채우기'); reset.type = 'button'; reset.disabled = busy || uncertain;
+      reset.addEventListener('click', () => { [30, 24, 18, 14, 9, 5].forEach((value, index) => { inputs[index].value = String(value); }); updateTotal(); inputs[0].focus(); });
+      actions.append(save, reset);
+      form.append(hint, fields, total, actions); updateTotal();
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const sum = updateTotal();
+        if (sum !== 100) inputs[0].setCustomValidity('여섯 확률의 합계를 100%로 맞춰 주세요.');
+        if (form.reportValidity()) saveOdds(inputs.map((input) => Number(input.value)));
+      });
+      return form;
+    }
+    async function saveOdds(weights) {
+      if (busy || uncertain || !token) return;
+      const epoch = requestEpoch;
+      lock(true); showNotice('슬롯 확률을 저장하고 있습니다…', 'pending');
+      try {
+        const data = await request('/api/slot-odds', 'PATCH', {weights, revision: state.revision});
+        if (epoch !== requestEpoch) return;
+        applyState(data); showNotice('슬롯 확률을 저장했습니다. 이 방의 다음 슬롯부터 적용됩니다.');
+      } catch (error) {
+        if (epoch !== requestEpoch) return;
+        if ([401, 403].includes(error.status)) { expire(); return; }
+        if (error.status === 409) { lock(false); await refresh(true); return; }
+        uncertain = true; showNotice('저장 결과를 확인할 수 없습니다. 새로고침으로 실제 확률을 확인한 후 다시 저장해 주세요.', 'error');
+      } finally { if (epoch === requestEpoch) { lock(false); $('slot-odds-0')?.focus({preventScroll: true}); } }
     }
     function makeLimitForm(limit, index) {
       const form = node('form', 'limit-form');
